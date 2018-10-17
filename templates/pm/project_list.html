@@ -1,0 +1,233 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls static admin_list %}
+
+{% block extrastyle %}
+  {{ block.super }}
+  <link rel="stylesheet" type="text/css" href="{% static "admin/css/changelists.css" %}" />
+  {% if cl.formset %}
+    <link rel="stylesheet" type="text/css" href="{% static "admin/css/forms.css" %}" />
+  {% endif %}
+  {% if cl.formset or action_form %}
+    <script type="text/javascript" src="{% url 'admin:jsi18n' %}"></script>
+  {% endif %}
+  {{ media.css }}
+  {% if not actions_on_top and not actions_on_bottom %}
+    <style>
+      #changelist table thead th:first-child {width: inherit}
+    </style>
+  {% endif %}
+{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+{{ media.js }}
+{% endblock %}
+
+{% block bodyclass %}{{ block.super }} app-{{ opts.app_label }} model-{{ opts.model_name }} change-list{% endblock %}
+
+{% if not is_popup %}
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+<a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
+&rsaquo; <a href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ opts.app_config.verbose_name }}</a>
+&rsaquo; {{ opts.verbose_name_plural|capfirst }}
+</div>
+{% endblock %}
+{% endif %}
+
+{% block coltype %}flex{% endblock %}
+<div id="content" class="flex">
+<h1>选择 0项目管理</h1>
+{% block content %}
+  <div id="content-main">
+    {% block object-tools %}
+        <ul class="object-tools">
+          {% block object-tools-items %}
+            {% if has_add_permission %}
+            <li>
+              {% url cl.opts|admin_urlname:'add' as add_url %}
+              <a href="{% add_preserved_filters add_url is_popup to_field %}" class="addlink">
+                {% blocktrans with cl.opts.verbose_name as name %}Add {{ name }}{% endblocktrans %}
+              </a>
+            </li>
+            {% endif %}
+          {% endblock %}
+        </ul>
+    {% endblock %}
+    {% if cl.formset.errors %}
+        <p class="errornote">
+        {% if cl.formset.total_error_count == 1 %}{% trans "Please correct the error below." %}{% else %}{% trans "Please correct the errors below." %}{% endif %}
+        </p>
+        {{ cl.formset.non_form_errors }}
+    {% endif %}
+    <div class="module{% if has_filters %} filtered{% endif %}" id="changelist">
+
+
+
+    <!--search-->
+    <div id="toolbar">
+        <form id="changelist-search" method="get">
+        <div><!-- DIV needed for valid HTML -->
+        <label for="searchbar"><img src="{% static "admin/img/search.svg" %}" alt="Search" /></label>
+        <input type="text" size="40" name="q" value="{{ queryq }}" id="searchbar" autofocus />
+        <input type="submit" value="{% trans 'Search' %}" />
+        {#{% if show_result_count %}#}
+        {#    <span class="small quiet">{% blocktrans count counter=cl.result_count %}{{ counter }} result{% plural %}{{ counter }} results{% endblocktrans %} (<a href="?{% if cl.is_popup %}_popup=1{% endif %}">{% if cl.show_full_result_count %}{% blocktrans with full_result_count=cl.full_result_count %}{{ full_result_count }} total{% endblocktrans %}{% else %}{% trans "Show all" %}{% endif %}</a>)</span>#}
+        {#{% endif %}#}
+        {#{% for pair in cl.params.items %}#}
+        {#    {% if pair.0 != search_var %}<input type="hidden" name="{{ pair.0 }}" value="{{ pair.1 }}"/>{% endif %}#}
+        {#{% endfor %}#}
+        </div>
+        </form>
+    </div>
+
+
+
+
+
+
+
+
+      {% block filters %}
+          <div id="changelist-filter">
+            <h2>{% trans 'Filter' %}</h2>
+            <h3>项目状态</h3>
+            <ul>
+                <li><a href="?">全部</a></li>
+                <li><a href="?status=FIS">待首款</a></li>
+                <li><a href="?status=ENS">待处理</a></li>
+                <li class="selected"><a href="?status=EXT">提取中</a></li>
+                <li><a href="?status=QC">质检中</a></li>
+                <li><a href="?status=LIB">建库中</a></li>
+                <li><a href="?status=SEQ">测序中</a></li>
+                <li><a href="?status=ANA">分析中</a></li>
+                <li><a href="?status=FIN">待尾款</a></li>
+                <li><a href="?status=FINE">尾款已到</a></li>
+                <li><a href="?status=END">完成</a></li>
+            </ul>
+          </div>
+      {% endblock %}
+
+
+
+      <form id="changelist-form" method="post"{% if cl.formset.is_multipart %} enctype="multipart/form-data"{% endif %} novalidate>{% csrf_token %}
+      {% if cl.formset %}
+        <div>{{ cl.formset.management_form }}</div>
+      {% endif %}
+
+
+
+
+
+
+      {% block result_list %}
+          <div class="results">
+            <table id="result_list">
+            <thead>
+            <tr>
+            <th scope="col" class="sortable column-id">
+               <div class="text"><a href="?o=1&amp;q=23">ID</a></div>
+               <div class="clear"></div>
+            </th>
+            <th scope="col" class="column-contract_number">
+               <div class="text"><span>合同号</span></div>
+               <div class="clear"></div>
+            </th>
+            <th scope="col" class="column-contract_name">
+
+               <div class="text"><span>项目名称</span></div>
+               <div class="clear"></div>
+            </th>
+            <th scope="col" class="sortable column-is_confirm">
+               <div class="text"><a href="?o=4&amp;q=23">确认</a></div>
+               <div class="clear"></div>
+            </th>
+            <th scope="col" class="sortable column-status">
+               <div class="text"><a href="?o=5&amp;q=23">状态</a></div>
+               <div class="clear"></div>
+            </th>
+            <th scope="col" class="column-contract_node">
+               <div class="text"><span>合同节点</span></div>
+               <div class="clear"></div>
+            </th>
+            <th scope="col" class="column-ext_status">
+               <div class="text"><span>提取完成</span></div>
+               <div class="clear"></div>
+            </th>
+            <th scope="col" class="column-qc_status">
+               <div class="text"><span>质检完成</span></div>
+               <div class="clear"></div>
+            </th>
+            <th scope="col" class="column-lib_status">
+               <div class="text"><span>建库完成</span></div>
+               <div class="clear"></div>
+            </th>
+            <th scope="col" class="column-seq_status">
+               <div class="text"><span>测序完成</span></div>
+               <div class="clear"></div>
+            </th>
+            <th scope="col" class="column-ana_status">
+               <div class="text"><span>分析完成</span></div>
+               <div class="clear"></div>
+            </th>
+            <th scope="col" class="column-report_sub">
+               <div class="text"><span>报告提交</span></div>
+               <div class="clear"></div>
+            </th>
+            <th scope="col" class="column-result_sub">
+               <div class="text"><span>结果提交</span></div>
+               <div class="clear"></div>
+            </th>
+            <th scope="col" class="column-data_sub">
+               <div class="text"><span>数据提交</span></div>
+               <div class="clear"></div>
+            </th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for project in project_list %}
+                {% if forloop.counter|divisibleby:2 %}
+                <tr class="row2">
+                    <td class="field-id">{{ project.id }}</td>
+                    <td class="field-contract_number">{{ project.contract.contract_number }}</td>
+                    <th class="field-contract_name"><a href="{% url 'admin:index' %}lims/sampleinfo/?q={{ project.contract.contract_number }}">{{ project.contract.name }}</a></th>
+                    {% if project.is_confirm %}
+                        <td class="field-is_confirm"><img src="/static/admin/img/icon-yes.svg" alt="False"></td>
+                    {% else %}
+                        <td class="field-is_confirm"><img src="/static/admin/img/icon-no.svg" alt="False"></td>
+                    {% endif %}
+                    <td class="field-status">{{ project.get_status_display }}</td><td class="field-due_date">{{ project.due_date }}</td>
+                    <td class="field-ext_date">{{ project.ext_date }}</td><td class="field-qc_date">{{ project.qc_date }}</td>
+                    <td class="field-lib_date">{{ project.lib_date }}</td><td class="field-seq_end_date">{{ project.seq_end_date }}</td>
+                    <td class="field-ana_end_date">{{ project.ana_end_date }}</td><td class="field-report_date">{{ project.report_date }}</td>
+                    <td class="field-result_date">{{ project.result_date }}</td><td class="field-data_date">{{ project.data_date }}</td></tr>
+                {% else %}
+
+                <tr class="row1"><td class="field-id">{{ project.id }}</td>
+                    <td class="field-contract_number">{{ project.contract.contract_number }}</td>
+                    <th class="field-contract_name"><a href="{% url 'admin:index' %}lims/sampleinfo/?q={{ project.contract.contract_number }}">{{ project.contract.name }}</a></th>
+                    {% if project.is_confirm %}
+                        <td class="field-is_confirm"><img src="/static/admin/img/icon-yes.svg" alt="True"></td>
+                    {% else %}
+                        <td class="field-is_confirm"><img src="/static/admin/img/icon-no.svg" alt="False"></td>
+                    {% endif %}
+                    <td class="field-data">{{ project.get_status_display }}</td><td class="field-due_date">{{ project.due_date }}</td>
+                    <td class="field-ext_date">{{ project.ext_date }}</td><td class="field-qc_date">{{ project.qc_date }}</td>
+                    <td class="field-lib_date">{{ project.lib_date }}</td><td class="field-seq_end_date">{{ project.seq_end_date }}</td>
+                    <td class="field-ana_end_date">{{ project.ana_end_date }}</td><td class="field-report_date">{{ project.report_date }}</td>
+                    <td class="field-result_date">{{ project.result_date }}</td><td class="field-data_date">{{ project.data_date }}</td>
+                </tr>
+                {% endif %}
+            {% endfor %}
+            </tbody>
+            </table>
+          </div>
+{#          {% if action_form and actions_on_top and cl.show_admin_actions %}{% admin_actions %}{% endif %}#}
+{#          {{ project_list }}#}
+{#          {% if action_form and actions_on_bottom and cl.show_admin_actions %}{% admin_actions %}{% endif %}#}
+      {% endblock %}
+      </form>
+    </div>
+  </div>
+{% endblock %}
+</div>

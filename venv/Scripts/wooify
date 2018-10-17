@@ -1,0 +1,9 @@
+#!F:\2018.9.14BMS\BMS-master\BMS-master\venv\Scripts\python.exe
+__author__ = 'chris'
+import os
+os.environ['WOOEY_BOOTSTRAP'] = 'True'
+
+from wooey.backend import command_line
+
+if __name__ == "__main__":
+    command_line.bootstrap()

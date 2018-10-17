@@ -1,0 +1,51 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}
+
+    <script src="{% static 'notification/notify.js' %}" type="text/javascript"></script>
+    <link rel="stylesheet" type="text/css" href="{% static "notification/notify.css" %}" />
+    <link href="{% static 'notification/bootstrap-3.3.7-dist/css/bootstrap.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block coltype %}flex{% endblock %}
+
+{% block bodyclass %}{{ block.super }} app-mm model-contract change-list {% endblock %}
+
+{% block title %}锐翌BMS {% endblock %}
+
+{% block content %}
+<div id="content-main">
+
+	<div class="row clearfix">
+		<div class="col-md-12 column">
+			<div class="row clearfix">
+				<div class="col-md-8 column">
+                    <div class="text-right">
+                        <button type="button" class="btn btn-success" ><a href="{% url 'notifications:mark_all_as_read' %}">Mark all read</a></button>
+                    </div>
+                    <hr>
+                    <ul class="list-group" ng-if="messages.length">
+                      {% for notice in notifications %}
+                        {% include 'notification/notice.html' %}
+                      {% endfor %}
+                    </ul>
+				</div>
+				<div class="col-md-3 column">
+                    <ul class="nav nav-pills nav-stacked">
+                        <li class="{% if active_unread %} active {% endif %}"><a href="{% url 'notifications:unread' %}">Unread <span class="badge pull-right" ng-if="messages.length">{% if active_unread %} {{ notifications|length }} {% else %} {{ unread|length }} {% endif %}</span></a></li>
+                        <li class="{% if active_all %} active {% endif %}"><a href="{% url 'notifications:all' %}">All<span class="badge pull-right" ng-if="messages.length">{% if active_all %}{{ notifications|length }}{% else %} {{ notifications_all|length }} {% endif %}</span></a></li>
+                    </ul>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+</div>
+{% endblock %}
+
+
+
+
+
